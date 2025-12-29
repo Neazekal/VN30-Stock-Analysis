@@ -14,7 +14,7 @@ VN30_STOCKS = [
     "MBB", "MSN", "MWG", "PLX", "POW", "SAB", "SHB", "SSB", "SSI", "STB", 
     "TCB", "TPB", "VCB", "VHM", "VIB", "VIC", "VJC", "VNM", "VPB", "VRE"
 ]
-# VN30_STOCKS = ["BID"]
+# VN30_STOCKS = ["BCM"]
 
 def check_and_close_ad(driver):
     """
@@ -261,6 +261,29 @@ def crawl_stock(driver, wait, symbol):
                 time.sleep(2)
 
             print(f"[{symbol}] Extracted {len(extracted_data)} records.")
+            
+            # 8. Fallback: Single Listing Check (e.g., BCM)
+            if not extracted_data:
+                 print(f"[{symbol}] No table data. Checking for single listing info...")
+                 script_single = """
+                 var body = document.body.innerText;
+                 var dateRegex = /Ngày niêm yết:\\s*(\\d{2}\\/\\d{2}\\/\\d{4})/;
+                 var volRegex = /Khối lượng niêm yết lần đầu:\\s*([0-9,]+)/;
+                 
+                 var dateMatch = body.match(dateRegex);
+                 var volMatch = body.match(volRegex);
+                 
+                 if (dateMatch && volMatch) {
+                     return [{
+                         'Ngay bo sung': dateMatch[1],
+                         'Co phieu luu hanh': volMatch[1]
+                     }];
+                 }
+                 return [];
+                 """
+                 extracted_data = driver.execute_script(script_single)
+                 if extracted_data:
+                     print(f"[{symbol}] Found single listing info: {extracted_data}")
             
             if extracted_data:
                 # Save data
