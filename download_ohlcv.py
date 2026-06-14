@@ -113,9 +113,9 @@ def download_multiple_stocks(
                 output_dir=output_dir
             )
             results[symbol] = df
-            print(f"✓ {symbol} completed\n")
+            print(f"[OK] {symbol} completed\n")
         except Exception as e:
-            print(f"✗ Error downloading {symbol}: {e}\n")
+            print(f"[FAIL] Error downloading {symbol}: {e}\n")
             results[symbol] = pd.DataFrame()
     
     return results
